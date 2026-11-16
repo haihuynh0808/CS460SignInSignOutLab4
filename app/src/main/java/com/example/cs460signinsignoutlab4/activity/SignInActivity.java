@@ -22,6 +22,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Displays the sign-in screen for existing users and navigates to registration for new account
+ */
 public class SignInActivity extends AppCompatActivity {
 
     private ActivitySignInBinding binding;
@@ -45,6 +48,9 @@ public class SignInActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Link the Sign-in and Create New Account to their actions
+     */
     private void setListeners() {
         binding.CreateNewAccount.setOnClickListener(v -> startActivity(new Intent(getApplicationContext(), SignUpActivity.class)));
 
@@ -55,10 +61,18 @@ public class SignInActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Shows a short message to the user
+     *
+     * @param message text to display
+     */
     private void showToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Attempts sign-in by checking Firestore if email and password exist in database
+     */
     private void SignIn() {
         loading(true);
         FirebaseFirestore database = FirebaseFirestore.getInstance();
@@ -76,6 +90,7 @@ public class SignInActivity extends AppCompatActivity {
                         preferenceManager.putString(Constants.KEY_NAME,documentSnapshot.getString(Constants.KEY_NAME));
                         preferenceManager.putString(Constants.KEY_IMAGE,documentSnapshot.getString(Constants.KEY_IMAGE));
 
+                        showToast("Login successful");
                         Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
@@ -86,6 +101,11 @@ public class SignInActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Toggles the Sign-in button and progress bar
+     *
+     * @param isLoading true while the log-in is in progress
+     */
     private void loading (Boolean isLoading) {
         if(isLoading) {
             binding.buttonSignIn.setVisibility(View.INVISIBLE);
@@ -96,6 +116,11 @@ public class SignInActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Checks if email and password are entered and valid
+     *
+     * @return true if all sign-in inputs pass validation
+     */
     private boolean isValidateSignInDetails() {
         if (binding.inputEmail.getText().toString().trim().isEmpty()) {
             showToast("Please enter your email");

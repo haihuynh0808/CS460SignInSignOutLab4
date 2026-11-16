@@ -34,6 +34,9 @@ import android.util.Base64;
 import java.util.HashMap;
 import java.util.regex.Pattern;
 
+/**
+ * Displays the registration screen and let user choose a profile picture
+ */
 public class SignUpActivity extends AppCompatActivity {
 
     private ActivitySignUpBinding binding;
@@ -60,6 +63,9 @@ public class SignUpActivity extends AppCompatActivity {
         setListeners();
     }
 
+    /**
+     * Connects registration, sign-up validation, and photo selection to their action.
+     */
     private void setListeners() {
         binding.textSignIn.setOnClickListener(v -> onBackPressed());
 
@@ -77,10 +83,18 @@ public class SignUpActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Displays a short message to the user
+     *
+     * @param message feedback to display
+     */
     private void showToast(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
+    /**
+     * Creates a secure Firebase Authentication account, saves profile picture
+     */
     private void SignUp() {
         // Check loading
         loading(true);
@@ -88,7 +102,8 @@ public class SignUpActivity extends AppCompatActivity {
         // Post to Firebase
         FirebaseFirestore database = FirebaseFirestore.getInstance();
         HashMap<String, String> user = new HashMap<>();
-        user.put(Constants.KEY_NAME,binding.inputName.getText().toString());
+        user.put(Constants.KEY_FIRST_NAME,binding.inputFirstName.getText().toString());
+        user.put(Constants.KEY_LAST_NAME,binding.inputLastName.getText().toString());
         user.put(Constants.KEY_EMAIL,binding.inputEmail.getText().toString());
         user.put(Constants.KEY_PASSWORD,binding.inputPassword.getText().toString());
 
@@ -100,7 +115,8 @@ public class SignUpActivity extends AppCompatActivity {
                     loading(false);
 
                     preferenceManager.putBoolean(Constants.KEY_IS_SIGNED_IN, true);
-                    preferenceManager.putString(Constants.KEY_NAME, binding.inputName.getText().toString());
+                    preferenceManager.putString(Constants.KEY_FIRST_NAME, binding.inputFirstName.getText().toString());
+                    preferenceManager.putString(Constants.KEY_LAST_NAME, binding.inputLastName.getText().toString());
                     preferenceManager.putString(Constants.KEY_IMAGE, encodeImage);
 
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
@@ -113,6 +129,12 @@ public class SignUpActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Shrinks the image to 150 pixels wide and converts it to Base64 JPEG
+     *
+     * @param bitmap selected image to encode
+     * @return Base64 JPEG string for the Firestore profile
+     */
     private String encodeImage(Bitmap bitmap) {
         int previewWidth = 150;
         int previewHeight = bitmap.getHeight()*previewWidth / bitmap.getWidth();
@@ -146,12 +168,20 @@ public class SignUpActivity extends AppCompatActivity {
             }
     );
 
+    /**
+     * Checks all required fields, photo selection, email format, and password matching
+     *
+     * @return true if all information is acceptable for registration
+     */
     private boolean isValidateSignUpDetails() {
         if (encodeImage == null) {
             showToast("Please select your image");
             return false;
-        } else if (binding.inputName.getText().toString().trim().isEmpty()) {
-            showToast("Please enter your name");
+        } else if (binding.inputFirstName.getText().toString().trim().isEmpty()) {
+            showToast("Please enter your first name");
+            return false;
+        } else if (binding.inputLastName.getText().toString().trim().isEmpty()) {
+            showToast("Please enter your last name");
             return false;
         } else if (binding.inputEmail.getText().toString().trim().isEmpty()) {
             showToast("Please enter your email");
@@ -173,6 +203,11 @@ public class SignUpActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Toggles the registration button and progress bar
+     *
+     * @param isLoading true during Firebase request
+     */
     private void loading (Boolean isLoading) {
         if(isLoading) {
             binding.buttonSignUp.setVisibility(View.INVISIBLE);
